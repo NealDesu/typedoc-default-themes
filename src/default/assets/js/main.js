@@ -390,25 +390,19 @@ var typedoc;
         var preventPress = false;
         var index;
         function createIndex() {
-            index = new lunr.Index();
-            index.pipeline.add(lunr.trimmer);
-            index.field('name', { boost: 10 });
-            index.field('parent');
-            index.ref('id');
-            var rows = search.data.rows;
-            var pos = 0;
-            var length = rows.length;
-            function batch() {
-                var cycles = 0;
-                while (cycles++ < 100) {
-                    index.add(rows[pos]);
-                    if (++pos == length) {
-                        return setLoadingState(2 /* Ready */);
-                    }
-                }
-                setTimeout(batch, 10);
-            }
-            batch();
+			index = lunr(function(){
+				this.ref('id');
+		        this.field('name', { boost: 10 });
+		        this.field('parent');
+		        
+
+				var rows = search.data.rows;
+				for (var i = 0; i < rows.length; i++){
+					this.add(rows[i])
+				}
+			});
+			return setLoadingState(SearchLoadingState.Ready);
+//            index.pipeline.add(lunr.trimmer);
         }
         function loadIndex() {
             if (loadingState != 0 /* Idle */)
